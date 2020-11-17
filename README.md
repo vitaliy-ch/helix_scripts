@@ -1,1 +1,2 @@
-# helix_scripts
+# Set of Helix scripts
+
