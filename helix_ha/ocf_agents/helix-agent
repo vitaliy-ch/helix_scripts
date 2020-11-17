@@ -1,0 +1,300 @@
+#!/bin/bash
+#
+#
+# Systemd OCF wrapper.
+#######################################################################
+# Initialization:
+
+: ${OCF_ROOT=/usr/lib/ocf}
+
+: ${OCF_FUNCTIONS=${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs}
+. ${OCF_FUNCTIONS}
+: ${__OCF_ACTION=$1}
+: ${OCF_RESKEY_helixns="default"}
+: ${OCF_RESKEY_helixuser="helix"}
+
+: ${OCF_RESKEY_start_retries=10}
+: ${OCF_RESKEY_start_retries_interval=30}
+
+: ${OCF_RESKEY_stop_retries=10}
+: ${OCF_RESKEY_stop_retries_interval=30}
+
+: ${OCF_RESKEY_monitor_timeout=30}
+
+AGENT_CMD="/usr/bin/su - ${OCF_RESKEY_helixuser} -c /bin/bash "
+KUBE_CONFIG="/etc/kubernetes/admin.conf"
+#######################################################################
+
+meta_data() {
+    cat <<END
+<?xml version="1.0"?>
+<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+<resource-agent name="helix-agent" version="1.0">
+<version>1.0</version>
+
+<longdesc lang="en">
+This is a Helix11 Zone Agent. It starts/stops Helix11 K8s deployments.
+</longdesc>
+<shortdesc lang="en">OCF Helix11 Zone Agent</shortdesc>
+
+<parameters>
+  <parameter name="helixns" unique="1" required="0">
+    <longdesc lang="en">
+      Namespace in which Helix deployments are.
+    </longdesc>
+    <shortdesc lang="en">Namespace for Helix</shortdesc>
+    <content type="string" default="default" />
+  </parameter>
+
+  <parameter name="helixuser" unique="1" required="1">
+    <longdesc lang="en">
+      Owner of Helix11 external dir.
+    </longdesc>
+    <shortdesc lang="en">Helix user</shortdesc>
+    <content type="string" default="" />
+  </parameter>
+
+  <parameter name="start_retries" unique="1" required="0">
+    <longdesc lang="en">
+      Number of tests if deployments are up.
+    </longdesc>
+    <shortdesc lang="en">Startup checks</shortdesc>
+    <content type="integer" default="10" />
+  </parameter>
+
+  <parameter name="start_retries_interval" unique="1" required="0">
+    <longdesc lang="en">
+      Interval in seconds between checks.
+    </longdesc>
+    <shortdesc lang="en">Checks interval</shortdesc>
+    <content type="integer" default="30" />
+  </parameter>
+
+  <parameter name="stop_retries" unique="1" required="0">
+    <longdesc lang="en">
+      Number of tests if deployments are down.
+    </longdesc>
+    <shortdesc lang="en">Startup checks</shortdesc>
+    <content type="integer" default="10" />
+  </parameter>
+
+  <parameter name="stop_retries_interval" unique="1" required="0">
+    <longdesc lang="en">
+      Interval in seconds between checks.
+    </longdesc>
+    <shortdesc lang="en">Checks interval</shortdesc>
+    <content type="integer" default="30" />
+  </parameter>
+
+  <parameter name="monitor_timeout" unique="1" required="0">
+    <longdesc lang="en">
+      Seconds for monitoring Helix deployment.
+      This parameter defines how long monitor function will wait all deployments to be up.
+      Don't mix it up with Pacemaker "op monitor timeout".
+    </longdesc>
+    <shortdesc lang="en">Monitor timeout</shortdesc>
+    <content type="integer" default="30" />
+  </parameter>
+
+  <parameter name="basedir" unique="1" required="1">
+    <longdesc lang="en">
+      Helix base directory.
+    </longdesc>
+    <shortdesc lang="en">Helix basedir</shortdesc>
+    <content type="string" default="" />
+  </parameter>
+
+</parameters>
+
+<actions>
+<action name="start"        timeout="300"/>
+<action name="stop"         timeout="300"/>
+<action name="monitor"      timeout="60s" interval="60s" depth="0"/>
+</actions>
+</resource-agent>
+END
+}
+
+#######################################################################
+
+helix_agent_usage() {
+    cat <<END
+usage: $0 {start|stop|monitor|meta-data}
+
+Expects to have a fully populated OCF RA-compliant environment set.
+END
+}
+
+helix_agent_clean() {
+    $KUBECTL_CMD --kubeconfig $KUBE_CONFIG delete deployment -n  $OCF_RESKEY_helixns --all
+    OLD_IFS=$IFS
+    IFS=$'\n'
+    for PODS in `$KUBECTL_CMD --kubeconfig $KUBE_CONFIG get pods -n $OCF_RESKEY_helixns 2>/dev/null | $SED '1d'`
+    do
+        POD=`echo $PODS | $TR -s ' ' | $CUT -d' ' -f1`
+        $KUBECTL_CMD --kubeconfig $KUBE_CONFIG delete pod $POD -n $OCF_RESKEY_helixns > /dev/null 2>&1
+    done
+    IFS=$OLD_IFS
+    return $OCF_SUCCESS
+}
+
+helix_agent_start() {
+    echo "`date` : Start Helix agent as `id` " >> /tmp/helix-agent.log
+    helix_agent_monitor 1
+    rc=$?
+        echo "`date` : Result of monitor is $rc " >> /tmp/helix-agent.log
+        case $rc in
+        0)  ocf_log debug "All Helix deployments are already up"
+            return $OCF_SUCCESS #All processes are already up. Probably should be error in order to clean previous deployments with old versions of images.
+            ;;
+        1)  ocf_log debug "Helix deployments are partially up"
+            return $OCF_ERR_GENERIC # Processes are up partially, not good at this stage so error.
+            ;;
+        esac
+
+    ocf_log debug "Starting Helix deployments"
+    if [ ! -f ${OCF_RESKEY_basedir}/integration/scripts/env/helix_agent_ext_env.sh ]
+    then
+      echo "${OCF_RESKEY_basedir}/integration/scripts/env/helix_agent_ext_env.sh not found!"
+      exit $OCF_ERR_GENERIC
+    fi
+    $AGENT_CMD << EOF #> /dev/null 2>&1
+    source ${OCF_RESKEY_basedir}/integration/scripts/env/helix_agent_ext_env.sh
+    ${OCF_RESKEY_basedir}/integration/scripts/kube_system.sh -c start -m all
+EOF
+   
+    for (( retries=1; retries <= ${OCF_RESKEY_start_retries}; retries++ ))
+    do
+        helix_agent_monitor ${OCF_RESKEY_start_retries_interval}
+        rc=$?
+        case $rc in
+        0)  EXIT=$OCF_SUCCESS
+            break
+            ;;
+        *)  EXIT=$OCF_ERR_GENERIC
+            ;;
+        esac
+    done
+    return $EXIT
+}
+
+helix_agent_stop() {
+    helix_agent_monitor 1
+    rc=$?
+    case $rc in
+    7)  ocf_log debug "All Helix deployments are already down"
+        return $OCF_SUCCESS #All processes are already stopped      
+        ;;
+    esac
+    ocf_log debug "Stopping Helix deployments"
+    if [ ! -f ${OCF_RESKEY_basedir}/integration/scripts/env/helix_agent_ext_env.sh ]
+    then
+      echo "${OCF_RESKEY_basedir}/integration/scripts/env/helix_agent_ext_env.sh not found!"
+    exit $OCF_ERR_GENERIC
+    fi
+    $AGENT_CMD << EOF #> /dev/null 2>&1
+    source ${OCF_RESKEY_basedir}/integration/scripts/env/helix_agent_ext_env.sh
+    ${OCF_RESKEY_basedir}/integration/scripts/kube_system.sh -c stop -m all
+EOF
+   
+    for (( retries=1; retries <= ${OCF_RESKEY_stop_retries}; retries++ ))
+    do
+        helix_agent_monitor ${OCF_RESKEY_stop_retries_interval}
+        rc=$?
+        case $rc in
+        7)  EXIT=$OCF_SUCCESS
+            break
+            ;;
+        *)  EXIT=$OCF_ERR_GENERIC
+            ;;
+        esac
+    done
+    return $EXIT
+}
+
+helix_agent_monitor() {
+        TIMEOUT=${1:-${OCF_RESKEY_monitor_timeout}}
+
+        # Just in case
+        SED="/usr/bin/sed"
+        TR="/usr/bin/tr"
+        CUT="/usr/bin/cut"
+        AWK="/usr/bin/awk"
+        GREP="/usr/bin/egrep"
+
+        KUBECTL_CMD="/usr/local/bin/kubectl"
+
+        HELIXNS=${OCF_RESKEY_helixns}
+
+        EXIT=$OCF_NOT_RUNNING
+        EXIT_MSG="No deployments found."
+
+        RUNNING=false
+
+        SECONDS=0
+        declare -A DEPL_ERRS
+        while [ $SECONDS -lt $TIMEOUT ]
+        do
+                OLD_IFS=$IFS
+                IFS=$'\n'
+                FAILED=false
+                for DEPLOYMENT in `$KUBECTL_CMD --kubeconfig $KUBE_CONFIG get deployments -n $HELIXNS 2>/dev/null | $SED '1d'`
+                do
+                        RUNNING=true
+                        DEPL_NAME=`echo $DEPLOYMENT | $TR -s ' ' | $CUT -d' ' -f1`
+                        DEPL_TOTAL=`echo $DEPLOYMENT | $TR -s ' ' | $CUT -d' ' -f2|$CUT -d'/' -f2`
+                        DEPL_READY=`echo $DEPLOYMENT | $TR -s ' ' | $CUT -d' ' -f2|$CUT -d'/' -f1`
+                        if [ $DEPL_READY -lt $DEPL_TOTAL ]
+                        then
+                          if ! $FAILED
+                          then
+                                 FAILED=true
+                                 EXIT=$OCF_ERR_GENERIC
+                                 EXIT_MSG="Not all processes are up: "
+                          fi
+                          DEPL_ERRS[$DEPL_NAME]="Only $DEPL_READY of $DEPL_TOTAL of $DEPL_NAME are up. "
+                        fi
+                done
+                IFS=$OLD_IFS
+
+                if $RUNNING && ! $FAILED
+                then
+                   EXIT=$OCF_SUCCESS
+                   EXIT_MSG="All processes are up."
+                   break
+                else if ! $FAILED
+                   then
+                          break
+                   fi
+                fi
+                sleep 1
+                ocf_log debug "Waiting for all deployments to be ready ..."
+        done
+        if $FAILED; then for DEPL_ERR in "${DEPL_ERRS[@]}"; do EXIT_MSG+=$DEPL_ERR; done; fi
+        ocf_log debug $EXIT_MSG
+        return $EXIT
+}
+
+helix_agent_validate() {
+    return $OCF_SUCCESS
+}
+
+case $__OCF_ACTION in
+meta-data)      meta_data
+                exit $OCF_SUCCESS
+                ;;
+start)          helix_agent_start;;
+stop)           helix_agent_stop;;
+clean)          helix_agent_clean;;
+monitor)        helix_agent_monitor;;
+validate-all)   helix_agent_validate;;
+usage|help)     helix_agent_usage
+                exit $OCF_SUCCESS
+                ;;
+*)              helix_agent_usage
+                exit $OCF_ERR_UNIMPLEMENTED
+                ;;
+esac
+rc=$?
+ocf_log debug "${OCF_RESOURCE_INSTANCE} $__OCF_ACTION : $rc"
+exit $rc

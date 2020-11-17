@@ -1,0 +1,20 @@
+[Unit]
+Description= Helix Weblogic Admin Server
+PartOf=helix_j2ee.target
+After=helix_j2ee.target
+
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+TimeoutStartSec=600
+TimeoutStopSec=600
+RestartSec=30
+Restart=always
+EnvironmentFile=/teoco/helix_web_basedir/project/env.ini
+ExecStart=/teoco/helix_web_basedir/integration/scripts/j2ee/jee-admin.ksh start
+ExecStop=/teoco/helix_web_basedir/integration/scripts/j2ee/jee-admin.ksh stop
+[Install]
+WantedBy=helix_j2ee.target

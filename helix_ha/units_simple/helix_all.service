@@ -1,0 +1,12 @@
+[Unit]
+Description=Helix services
+Requires=dbora.service helix_netracx.target helix_j2ee.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/echo "Start all Helix processes"
+RemainAfterExit=yes
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target

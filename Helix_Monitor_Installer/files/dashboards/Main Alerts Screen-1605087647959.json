@@ -1,0 +1,1212 @@
+{
+"dashboard": {
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 5,
+  "iteration": 1605087642978,
+  "links": [
+    {
+      "$$hashKey": "object:1481",
+      "icon": "external link",
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Oracle DB",
+      "tooltip": "Drill to Oracle DB",
+      "type": "link",
+      "url": "/d/OmEEQj4Mz/oracle-db-new?orgId=1&var-env=${env}"
+    },
+    {
+      "$$hashKey": "object:1482",
+      "icon": "external link",
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": true,
+      "title": "FM",
+      "tooltip": "Drill to FM",
+      "type": "link",
+      "url": "/d/lWnI2kSMz/fm?orgId=1&var-env=${env}"
+    },
+    {
+      "$$hashKey": "object:1483",
+      "icon": "external link",
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": true,
+      "title": "PM",
+      "tooltip": "Drill to PM",
+      "type": "link",
+      "url": "d/CGMXT4MGz/pm?orgId=1&var-env=${env}"
+    }
+  ],
+  "panels": [
+    {
+      "cacheTimeout": null,
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "yellow",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Minor"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Major"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Critical"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "interval": null,
+      "links": [],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "pluginVersion": "7.0.5",
+      "targets": [
+        {
+          "alias": "[[tag_severity]]",
+          "groupBy": [
+            {
+              "params": [
+                "severity"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "helix_alerts",
+          "orderByTime": "ASC",
+          "policy": "monitoring",
+          "query": "SELECT count(\"count\") FROM (SELECT count(\"message\") FROM helix_alerts GROUP BY env, host, source, managed_object, metric, severity) WHERE (\"env\" =~ /^$env$/ AND \"severity\" = '1' AND $timeFilter) group by severity\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env",
+              "operator": "=~",
+              "value": "/^$env$/"
+            },
+            {
+              "condition": "AND",
+              "key": "time",
+              "operator": ">",
+              "value": "now() - 1h"
+            },
+            {
+              "condition": "AND",
+              "key": "severity",
+              "operator": "=",
+              "value": "1"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Minor",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Minor"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Major"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Critical"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 2,
+        "y": 0
+      },
+      "id": 12,
+      "interval": null,
+      "links": [],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "pluginVersion": "7.0.5",
+      "targets": [
+        {
+          "alias": "[[tag_severity]]",
+          "groupBy": [
+            {
+              "params": [
+                "severity"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "helix_alerts",
+          "orderByTime": "ASC",
+          "policy": "monitoring",
+          "query": "SELECT count(\"count\") FROM (SELECT count(\"message\") FROM helix_alerts GROUP BY env, host, source, managed_object, metric, severity) WHERE (\"env\" =~ /^$env$/ AND \"severity\" = '2' AND $timeFilter) group by severity",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env",
+              "operator": "=~",
+              "value": "/^$env$/"
+            },
+            {
+              "condition": "AND",
+              "key": "time",
+              "operator": ">",
+              "value": "now() - 1h"
+            },
+            {
+              "condition": "AND",
+              "key": "severity",
+              "operator": "=",
+              "value": "2"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Major",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgb(245, 16, 16)",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "1"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Minor"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Major"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Critical"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 4,
+        "y": 0
+      },
+      "id": 14,
+      "interval": null,
+      "links": [],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "pluginVersion": "7.0.5",
+      "targets": [
+        {
+          "alias": "[[tag_severity]]",
+          "groupBy": [
+            {
+              "params": [
+                "severity"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "helix_alerts",
+          "orderByTime": "ASC",
+          "policy": "monitoring",
+          "query": "SELECT count(\"count\") FROM (SELECT count(\"message\") FROM helix_alerts GROUP BY env, host, source, managed_object, metric, severity) WHERE (\"env\" =~ /^$env$/ AND \"severity\" = '3' AND $timeFilter) group by severity",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env",
+              "operator": "=~",
+              "value": "/^$env$/"
+            },
+            {
+              "condition": "AND",
+              "key": "time",
+              "operator": ">",
+              "value": "now() - 1h"
+            },
+            {
+              "condition": "AND",
+              "key": "severity",
+              "operator": "=",
+              "value": "3"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Critical",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "breakPoint": "100%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": 0
+      },
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "fontSize": "80%",
+      "format": "short",
+      "gridPos": {
+        "h": 5,
+        "w": 7,
+        "x": 6,
+        "y": 0
+      },
+      "id": 4,
+      "interval": null,
+      "legend": {
+        "percentage": true,
+        "percentageDecimals": 1,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "values": true
+      },
+      "legendType": "Right side",
+      "links": [],
+      "nullPointMode": "connected",
+      "pieType": "pie",
+      "pluginVersion": "7.0.5",
+      "strokeWidth": "1",
+      "targets": [
+        {
+          "alias": "[[tag_env]]",
+          "groupBy": [
+            {
+              "params": [
+                "env"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "helix_alerts",
+          "orderByTime": "ASC",
+          "policy": "monitoring",
+          "query": "select count(\"message\") as \"count\" from (select last(\"message\") as \"message\" from helix_alerts WHERE (\"env\" =~ /^$env$/ AND $timeFilter) GROUP BY \"env\", \"host\", \"managed_object\", \"metric\", \"source\") group by \"env\"\n",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              },
+              {
+                "params": [
+                  "env"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env",
+              "operator": "=~",
+              "value": "/^$env$/"
+            },
+            {
+              "condition": "AND",
+              "key": "time",
+              "operator": ">",
+              "value": "now() - 1h"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Alerts by env",
+      "transparent": true,
+      "type": "grafana-piechart-panel",
+      "valueName": "current"
+    },
+    {
+      "aliasColors": {},
+      "breakPoint": "100%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": 0
+      },
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "fontSize": "80%",
+      "format": "short",
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 13,
+        "y": 0
+      },
+      "id": 8,
+      "interval": null,
+      "legend": {
+        "percentage": true,
+        "percentageDecimals": 1,
+        "show": true,
+        "sort": "current",
+        "sortDesc": true,
+        "values": true
+      },
+      "legendType": "Right side",
+      "links": [],
+      "nullPointMode": "connected",
+      "pieType": "pie",
+      "pluginVersion": "7.0.5",
+      "strokeWidth": 1,
+      "targets": [
+        {
+          "alias": "[[tag_metric]]",
+          "groupBy": [
+            {
+              "params": [
+                "metric"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "helix_alerts",
+          "orderByTime": "ASC",
+          "policy": "monitoring",
+          "query": "select count(\"message\") as \"count\" from (select last(\"message\") as \"message\" from helix_alerts WHERE (\"env\" =~ /^$env$/ AND $timeFilter) GROUP BY \"env\", \"host\", \"managed_object\", \"metric\", \"source\") group by \"metric\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "count"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env",
+              "operator": "=~",
+              "value": "/^$env$/"
+            },
+            {
+              "condition": "AND",
+              "key": "time",
+              "operator": ">",
+              "value": "now() - 1h"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Alerts by metric",
+      "transparent": true,
+      "type": "grafana-piechart-panel",
+      "valueName": "current"
+    },
+    {
+      "columns": [],
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 24,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 2,
+      "links": [],
+      "pageSize": null,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "$$hashKey": "object:2531",
+          "alias": "Timestamp",
+          "align": "auto",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "$$hashKey": "object:2532",
+          "alias": "Managed Object",
+          "align": "auto",
+          "colorMode": "cell",
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": false,
+          "mappingType": 1,
+          "pattern": "managed_object",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "$$hashKey": "object:2533",
+          "alias": "Host",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "link": true,
+          "linkTargetBlank": true,
+          "linkTooltip": "Host metrics",
+          "linkUrl": "/d/1001/system?orgId=1&var-server=${__cell:raw}",
+          "mappingType": 1,
+          "pattern": "host",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "$$hashKey": "object:2534",
+          "alias": "Severity",
+          "align": "auto",
+          "colorMode": "value",
+          "colors": [
+            "#FADE2A",
+            "#FF9830",
+            "#F2495C"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Severity",
+          "thresholds": [
+            "2",
+            "3"
+          ],
+          "type": "string",
+          "unit": "short",
+          "valueMaps": [
+            {
+              "$$hashKey": "object:2616",
+              "text": "Minor",
+              "value": "1"
+            },
+            {
+              "$$hashKey": "object:2617",
+              "text": "Major",
+              "value": "2"
+            },
+            {
+              "$$hashKey": "object:2618",
+              "text": "Critical",
+              "value": "3"
+            }
+          ]
+        },
+        {
+          "$$hashKey": "object:498",
+          "alias": "Env",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "env",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "$$hashKey": "object:534",
+          "alias": "Metric",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "metric",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        },
+        {
+          "$$hashKey": "object:615",
+          "alias": "Source",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "source",
+          "thresholds": [],
+          "type": "string",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "env"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "host"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "managed_object"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "metric"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "source"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "helix_alerts",
+          "orderByTime": "DESC",
+          "policy": "default",
+          "query": "SELECT last(\"alert_state\") AS \"Alert\" FROM \"teoco_hm_alertlog\" WHERE (\"env\" =~ /^$env$/ AND \"host\" =~ /^$host$/ AND \"managed_object\" =~ /^$managed_object$/ AND \"metric\" =~ /^$metric$/) AND $timeFilter GROUP BY \"env\", \"host\", \"managed_object\", \"metric\", \"alert\" ORDER BY time DESC",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "table",
+          "select": [
+            [
+              {
+                "params": [
+                  "severity"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [
+                  "Severity"
+                ],
+                "type": "alias"
+              }
+            ],
+            [
+              {
+                "params": [
+                  "message"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "Message"
+                ],
+                "type": "alias"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "env",
+              "operator": "=~",
+              "value": "/^$env$/"
+            },
+            {
+              "condition": "AND",
+              "key": "host",
+              "operator": "=~",
+              "value": "/^$host$/"
+            },
+            {
+              "condition": "AND",
+              "key": "managed_object",
+              "operator": "=~",
+              "value": "/^$managed_object$/"
+            },
+            {
+              "condition": "AND",
+              "key": "metric",
+              "operator": "=~",
+              "value": "/^$metric$/"
+            },
+            {
+              "condition": "AND",
+              "key": "severity",
+              "operator": "=~",
+              "value": "/^$severity_num$/"
+            },
+            {
+              "condition": "AND",
+              "key": "source",
+              "operator": "=~",
+              "value": "/^$source$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Alerts",
+      "transform": "table",
+      "type": "table-old"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 25,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "InfluxDB",
+        "definition": "SHOW TAG VALUES FROM  helix_alerts  WITH KEY = \"env\"",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Env",
+        "multi": true,
+        "name": "env",
+        "options": [],
+        "query": "SHOW TAG VALUES FROM  helix_alerts  WITH KEY = \"env\"",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "InfluxDB",
+        "definition": "SHOW TAG VALUES FROM  helix_alerts  WITH KEY = \"host\"  where  env =~ /$env/",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Host",
+        "multi": true,
+        "name": "host",
+        "options": [],
+        "query": "SHOW TAG VALUES FROM  helix_alerts  WITH KEY = \"host\"  where  env =~ /$env/",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "InfluxDB",
+        "definition": "show tag values from helix_alerts with key = \"managed_object\"  ",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Managed Object",
+        "multi": true,
+        "name": "managed_object",
+        "options": [],
+        "query": "show tag values from helix_alerts with key = \"managed_object\"  ",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "InfluxDB",
+        "definition": "show tag values from helix_alerts with key = \"metric\" where env =~ /$env/ and host =~ /$host/ ",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Metric",
+        "multi": true,
+        "name": "metric",
+        "options": [],
+        "query": "show tag values from helix_alerts with key = \"metric\" where env =~ /$env/ and host =~ /$host/ ",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "InfluxDB",
+        "definition": "show tag values from  helix_alerts with key = \"source\" where env =~ /$env/ ",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Source",
+        "multi": true,
+        "name": "source",
+        "options": [],
+        "query": "show tag values from  helix_alerts with key = \"source\" where env =~ /$env/ ",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "InfluxDB",
+        "definition": "show tag values from forever.helix_alert_severity with key = \"num\"  where text =~ /$severity_text/",
+        "hide": 2,
+        "includeAll": true,
+        "label": "",
+        "multi": true,
+        "name": "severity_num",
+        "options": [],
+        "query": "show tag values from forever.helix_alert_severity with key = \"num\"  where text =~ /$severity_text/",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "InfluxDB",
+        "definition": "show tag values from forever.helix_alert_severity with key = \"text\"",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Severity",
+        "multi": true,
+        "name": "severity_text",
+        "options": [],
+        "query": "show tag values from forever.helix_alert_severity with key = \"text\"",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "Main Alerts Screen",
+  "id": null, 
+  "uid": "1002",
+  "version": 26
+}
+}

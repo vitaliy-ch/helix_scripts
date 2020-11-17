@@ -1,0 +1,17 @@
+[Unit]
+Description= Helix apache service
+Wants=network.target remote-fs.target
+After=network.target remote-fs.target
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+Restart=no
+Environment="LD_LIBRARY_PATH=/teoco/helix_web_basedir/tti3rd/apache/lib" "LD_LIBRARY_PATH_64=/teoco/helix_web_basedir/tti3rd/apache/lib"
+TimeoutStopSec=30
+ExecStart=/teoco/helix_web_basedir/tti3rd/apache/bin/apachectl start
+ExecStop=/teoco/helix_web_basedir/tti3rd/apache/bin/apachectl stop
+[Install]
+WantedBy=multi-user.target

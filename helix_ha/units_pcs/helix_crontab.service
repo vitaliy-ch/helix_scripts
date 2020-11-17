@@ -1,0 +1,14 @@
+[Unit]
+Description=Helix crontab script
+Wants=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+User=helix
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/crontab /teoco/helix_web_basedir/project/web.crontab
+ExecStop=/usr/bin/crontab -r
+
+[Install]
+WantedBy=multi-user.target

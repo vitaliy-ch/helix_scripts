@@ -1,0 +1,21 @@
+[Unit]
+Description= Helix tomcat service
+PartOf=helix_j2ee.target
+After=helix_boe.service
+Wants=helix_boe.service
+
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+TimeoutStartSec=300
+TimeoutStopSec=300
+RestartSec=30
+Restart=always
+EnvironmentFile=/teoco/helix_web_basedir/project/env.ini
+ExecStart=/teoco/helix_web_basedir/tti3rd/boe/sap_bobj/tomcatstartup.sh
+ExecStop=/teoco/helix_web_basedir/tti3rd/boe/sap_bobj/tomcatshutdown.sh
+[Install]
+WantedBy=helix_j2ee.target

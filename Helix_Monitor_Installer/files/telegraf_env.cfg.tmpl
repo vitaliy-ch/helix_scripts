@@ -1,0 +1,27 @@
+NAME={{HELIX_ENV_TAG}}
+
+
+INFLUX_DB_HOST={{HELIX_MONITOR_HOST}}
+INFLUX_DB_PORT={{INFLUXDB_PORT}}
+
+
+### NOTES:
+### (a) <CORES_USE_LOCAL_TS> format:  True,ON,1,Y,Yes  = use local server time for cores detected
+###                                   False,OFF,0,N,No = use original time of cores detected
+### (b) 10080 is used for demo only; on production, default is 60
+### (c) <CORES_SCAN_MASK> is core-files mask, typically as $LOG_DIR/CORES/<CORES_SCAN_MASK>
+CORES_SCAN_PERIOD_MIN = 10080
+CORES_SCAN_MASK       = pstack_*
+CORES_USE_LOCAL_TS    = True
+
+JCORE_SCAN_PERIOD_MIN   = 60
+JCORE_SCAN_TIME_MASK    = %Y-%m-%d %H
+JCORE_SCAN_SEVERITY     = ERROR
+JCORE_SCAN_MESSAGE_MASK =
+
+
+### NOTES:
+### (a) <ICMP_SERVER_LIST> format: remote ip1,hostname1[|ip2,hostname2...]
+### (b) if <ICMP_SERVER_LIST> empty, 
+###        <ICMP_USE_SYSTEM_HOSTS> used: Y|yes|1|on = use /etc/hosts; N|no|0|off = none (typically for case (a))
+#ICMP_SERVER_LIST = 10.50.226.195,dc50-demo-tds1|10.50.227.26,d50i-hlx-app88|172.30.1.252,agent01|172.30.1.253,agent02

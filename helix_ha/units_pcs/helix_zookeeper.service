@@ -1,0 +1,21 @@
+[Unit]
+Description= Helix zookeeper service
+Wants=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+TimeoutStartSec=300
+TimeoutStopSec=300
+RestartSec=30
+Restart=no
+EnvironmentFile=/teoco/helix_web_basedir/project/env/env.ini
+ExecStart=/teoco/helix_web_basedir/integration/scripts/j2ee/zookeeper.ksh start
+ExecStop=/teoco/helix_web_basedir/integration/scripts/j2ee/zookeeper.ksh stop
+
+[Install]
+WantedBy=multi-user.target

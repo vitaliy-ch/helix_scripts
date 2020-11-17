@@ -1,0 +1,23 @@
+[Unit]
+Description= Helix N2 %i
+PartOf=helix_netracx.target
+After=helix_n2sh_parent.service
+Wants=helix_n2sh_parent.service
+
+[Service]
+StandardOutput=null
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+TimeoutStartSec=300
+TimeoutStopSec=300
+RestartSec=30
+Restart=always
+EnvironmentFile=/teoco/helix_med_basedir/project/env.ini
+ExecStart=/teoco/helix_med_basedir/integration/scripts/system.ksh start %i
+ExecStop=/teoco/helix_med_basedir/integration/scripts/system.ksh stop %i
+
+[Install]
+WantedBy=helix_netracx.target

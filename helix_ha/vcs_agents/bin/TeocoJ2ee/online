@@ -1,0 +1,30 @@
+#!/bin/bash
+#------------------------------------------------------------------------------#
+#
+# File:          online
+# Author:        Landau Oren
+# Last Update:   01-Sep-2009
+#
+# Description:
+# VCS Apache Resource Type online Entry Point
+# This script onlines an actuate instance.
+#
+#------------------------------------------------------------------------------#
+#VCS_HOME=/opt/VRTSagents/ha/
+VCS_HOME=/root/systemd_helix/vcs_agents
+OWNER=$2
+SCRIPT_FILE=$3
+PARAMS=$4
+
+if [ ! -f ${VCS_HOME}/bin/Netrac/vcs_netrac_include.sh ]
+then
+    echo "Agent $0: cannot open ${VCS_HOME}/bin/Netrac/vcs_netrac_include.sh"
+    exit 1
+fi
+
+# load global definitions
+. ${VCS_HOME}/bin/Netrac/vcs_netrac_include.sh
+
+su - ${OWNER} -c "${SCRIPT_DIR}/${SCRIPT_FILE} $PARAMS"  #> /dev/null
+
+exit $?

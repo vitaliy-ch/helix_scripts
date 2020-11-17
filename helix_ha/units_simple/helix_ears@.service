@@ -1,0 +1,21 @@
+[Unit]
+Description= Helix %i EAR
+PartOf=helix_j2ee.target
+After=helix_wls_admin.service helix_kafka.service
+Wants=helix_wls_admin.service helix_kafka.service
+
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+TimeoutStartSec=600
+TimeoutStopSec=600
+RestartSec=30
+Restart=always
+EnvironmentFile=/teoco/helix_web_basedir/project/env.ini
+ExecStart=/teoco/helix_web_basedir/integration/scripts/system.ksh start %i
+ExecStop=/teoco/helix_web_basedir/integration/scripts/system.ksh stop %i
+[Install]
+WantedBy=helix_j2ee.target

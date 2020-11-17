@@ -1,0 +1,23 @@
+[Unit]
+Description=The Oracle Database Service
+After=network.target
+
+[Service]
+Type=forking
+RemainAfterExit=yes
+KillMode=none
+TimeoutStopSec=10min
+
+# memlock limit is needed for SGA to use HugePages
+LimitMEMLOCK=infinity
+LimitNOFILE=65535
+LimitNPROC=16384
+
+User=oracle
+Group=oinstall
+ExecStart=/oracle/products/19.3/bin/dbstart /oracle/products/19.3
+ExecStop=/oracle/products/19.3/bin/dbshut /oracle/products/19.3
+Restart=no
+
+[Install]
+WantedBy=default.target

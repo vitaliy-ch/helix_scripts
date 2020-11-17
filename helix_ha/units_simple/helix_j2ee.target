@@ -1,0 +1,26 @@
+[Unit]
+DefaultDependencies=no
+Description=J2EE meta service
+BindsTo=helix_all.service
+After=dbora.service
+#Wants=dbora.service network.target remote-fs.target
+Wants=network.target remote-fs.target
+
+Wants=helix_apache.service
+Wants=helix_nginx.service
+Wants=helix_zookeeper.service
+Wants=helix_kafka.service
+Wants=helix_wls_admin.service
+Wants=helix_boe.service
+Wants=helix_tomcat.service
+Wants=helix_remedy.service
+Wants=helix_ears@FamCache1.service
+Wants=helix_ears@FE-FH.service
+Wants=helix_ears@FM.service
+Wants=helix_ears@HelixConsole.service
+Wants=helix_ears@PM.service
+Wants=helix_ears@VIEWS.service
+Wants=helix_ears@WR.service
+
+[Install]
+WantedBy=multi-user.target

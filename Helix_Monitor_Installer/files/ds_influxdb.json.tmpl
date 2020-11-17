@@ -1,0 +1,14 @@
+  {
+    "name": "InfluxDB",
+    "type": "influxdb",
+    "access": "proxy",
+    "url": "https://{{HELIX_MONITOR_HOST}}:{{INFLUXDB_PORT}}",
+    "password": "{{INFLX_PASS}}",
+    "user": "{{INFLX_USER}}",
+    "database": "monitoring",
+    "basicAuth": false,
+    "isDefault": true,
+    "jsonData": {
+      "tlsSkipVerify": true
+    }
+  }

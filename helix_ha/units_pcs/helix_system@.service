@@ -1,0 +1,18 @@
+[Unit]
+Description= Helix Start ears
+Wants=network.target remote-fs.target
+After=network.target remote-fs.target
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+TimeoutStartSec=600
+TimeoutStopSec=600
+Restart=no
+EnvironmentFile=/teoco/helix_web_basedir/project/env/env.ini
+ExecStart=/teoco/helix_web_basedir/integration/scripts/system.ksh start %i
+ExecStop=/teoco/helix_web_basedir/integration/scripts/system.ksh stop %i
+[Install]
+WantedBy=multi-user.target

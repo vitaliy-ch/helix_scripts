@@ -1,0 +1,17 @@
+[Unit]
+Description= Helix N2 connect
+Wants=network.target remote-fs.target
+After=network.target remote-fs.target
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=simple
+TimeoutStartSec=60
+TimeoutStopSec=60
+Restart=no
+EnvironmentFile=/teoco/helix_med_basedir/project/env/env.ini
+ExecStart=/teoco/helix_med_basedir/n2server/N2/RHEL_6.8_g++_4.4.7_64/release/executables/connect -daemon med2_secondary_parent.connect -expr '(define host-name "helix-mediation")'
+[Install]
+WantedBy=multi-user.target

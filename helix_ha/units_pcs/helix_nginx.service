@@ -1,0 +1,17 @@
+[Unit]
+Description= Helix nginx service
+Wants=network.target remote-fs.target
+After=network.target remote-fs.target
+[Service]
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=forking
+PIDFile=/teoco/helix_web_basedir/tti3rd/nginx/logs/nginx.pid
+Restart=no
+EnvironmentFile=/teoco/helix_web_basedir/project/env/env.ini
+ExecStart=/teoco/helix_web_basedir/tti3rd/nginx/nginx.sh start
+ExecStop=/teoco/helix_web_basedir/tti3rd/nginx/nginx.sh stop
+[Install]
+WantedBy=multi-user.target

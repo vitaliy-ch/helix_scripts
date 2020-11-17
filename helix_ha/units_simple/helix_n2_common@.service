@@ -1,0 +1,22 @@
+[Unit]
+Description= Helix N2 %i
+PartOf=helix_netracx.target
+#After=helix_med2_parent.service
+#Wants=helix_med2_parent.service
+After=helix_n2sh_parent.service
+Wants=helix_n2sh_parent.service
+
+[Service]
+StandardOutput=null
+LimitCORE=infinity
+LimitNOFILE=8192
+LimitNPROC=500000
+User=helix
+Type=simple
+RestartSec=30
+Restart=always
+EnvironmentFile=/teoco/helix_med_basedir/project/env.ini
+ExecStart=/teoco/helix_med_basedir/n2server/N2/RHEL_6.8_g++_4.4.7_64/release/executables/connect -daemon %i.connect
+
+[Install]
+WantedBy=helix_netracx.target
