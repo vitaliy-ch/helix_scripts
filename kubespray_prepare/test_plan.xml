@@ -1,0 +1,793 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<InstallationPlan schemaVersion="1.5">
+  <System jeeAppServerType="weblogic" helixAgentAddress="d50i-hlx-app97:4006"  helixClientAddress="d50i-hlx-app97:4005"/>
+<!--  <JCoreLicenseFile>/helix/installer/license/jcore_license.xml</JCoreLicenseFile>-->
+  <DB>
+    <Host>d50d-sa-db01</Host>
+    <Port>1529</Port>
+    <User>psa</User>
+    <Password>ttipass</Password>
+    <SysUser>sys</SysUser>
+    <SysPassword>ttipass</SysPassword>
+    <Home>/OracleSoftware/Oracle_Client_19c_linux</Home>
+    <Interface type="Service">saqadokr</Interface>
+    <MaxConnections>200</MaxConnections>
+    <NlsLang>AMERICAN_AMERICA.WE8ISO8859P15</NlsLang>
+  </DB>
+  <!-- ########################### ZONES Definitions ################################################# -->
+  <Zones>
+    <Zone configID="Center" name="Center">
+      <Hosts>
+        <Host configID="J2EE-A-1" name="d50i-sa-app09" unix_user="helix"/>
+        <Host configID="J2EE-A-2" name="d50i-sa-app10" unix_user="helix"/>
+        <Host configID="J2EE-B-1" name="d50i-sa-app11" unix_user="helix"/>
+        <Host configID="J2EE-B-2" name="d50i-sa-app12" unix_user="helix"/>
+        <Host configID="J2EE-MAIN" name="d50i-sa-app13" unix_user="helix"/>
+        <Host configID="MED-1" name="d50i-sa-app14" unix_user="helix"/>
+      </Hosts>
+    </Zone>
+    <Zone configID="UK-ZONE" name="UK" externalBaseDir="/helix">
+      <Hosts>
+        <Host configID="UK-AGENT1" name="dc44-sadev-app01" main="true" unix_user="teoco"/>
+        <Host configID="UK-AGENT2" name="dc44-sadev-app09" unix_user="teoco"/>
+        <Host configID="UK-AGENT3" name="dc44-sadev-app11" unix_user="teoco"/>
+      </Hosts>
+    </Zone>
+    <Zone configID="ISR-ZONE" name="ISR" externalBaseDir="/helix">
+      <Hosts>
+        <Host configID="ISR-AGENT1" name="dc50-dev-gold18" main="true" unix_user="lxgold18"/>
+      </Hosts>
+    </Zone>
+  </Zones>
+  <NSDomains>
+    <NSDomain name="MasterNS" nsHost="d50i-sa-app14" nsPort="5603">
+      <Hosts>
+        <Host name="d50i-sa-app09"/>
+        <Host name="d50i-sa-app10"/>
+        <Host name="d50i-sa-app11"/>
+        <Host name="d50i-sa-app12"/>
+        <Host name="d50i-sa-app13"/>
+        <Host name="d50i-sa-app14"/>
+      </Hosts>
+      <Routers>
+        <RNS name="MasterRNS" rnsHost="d50i-sa-app14" rnsPort="5800" description="rns-for-clients" ssl="one-way-ssl">
+          <RS service="guaranteed" notificationPort="29810" executionPort="29811" isMirror="false"/>
+        </RNS>
+        <RNS name="RNS_FOR_ZONES" rnsHost="d50i-sa-app14" rnsPort="5900" description="rns-for-zones" ssl="two-way-ssl">
+          <RS service="guaranteed" notificationPort="29910" executionPort="29911" isMirror="false"/>
+        </RNS>
+      </Routers>
+    </NSDomain>
+    <!-- #################################################################################### -->
+    <NSDomain name="UK-NSDOMAIN" nsHost="dc44-sadev-app01" nsPort="5603">
+      <Hosts>
+        <Host name="dc44-sadev-app01"/>
+        <Host name="dc44-sadev-app09"/>
+      </Hosts>
+      <Routers>
+        <RNS name="RNS_FOR_UK_ZONE" rnsHost="dc44-sadev-app01" rnsPort="5900" description="rns-for-center" ssl="two-way-ssl">
+          <RS service="guaranteed" notificationPort="29910" executionPort="29911" isMirror="true"/>
+        </RNS>
+      </Routers>
+      <Chains>
+        <Chain ns="MasterNS" rns="RNS_FOR_ZONES"/>
+      </Chains>
+    </NSDomain>
+    <!-- #################################################################################### -->
+    <NSDomain name="ISR-NSDOMAIN" nsHost="dc50-dev-gold18" nsPort="5603">
+      <Hosts>
+        <Host name="dc50-dev-gold18"/>
+      </Hosts>
+      <Routers>
+        <RNS name="RNS_FOR_ISR_ZONE" rnsHost="dc50-dev-gold18" rnsPort="5900" description="rns-for-center" ssl="two-way-ssl">
+          <RS service="guaranteed" notificationPort="29910" executionPort="29911" isMirror="true"/>
+        </RNS>
+      </Routers>
+      <Chains>
+        <Chain ns="MasterNS" rns="RNS_FOR_ZONES"/>
+      </Chains>
+    </NSDomain>
+    <!-- #################################################################################### -->
+  </NSDomains>
+  <Hosts>
+    <!-- DUMMY BASE_DIR AS IT SET PER HOST -->
+    <BaseDir>/teoco/helix</BaseDir>
+    <!-- ### global tcp setings for N2 processes - can be overidden at the host level ### -->
+    <TcpKeepAlive time="30" probes="3" intvl="10"/>
+    <!-- CORE APPS and MED1 -->
+    <Host name="d50i-sa-app14" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <BaseDir>/teoco/helix_med1</BaseDir>
+      <DB>
+        <Home>/OracleSoftware/Oracle_Client_19c_linux</Home>
+        <Interface type="Service">saqadokr</Interface>
+      </DB>
+      <NetracServer mediationPrimaryServer="true">
+        <!--###### INFRA ######-->
+        <App name="BC"/>
+        <App name="COMMON"/>
+        <App name="PM_DB"/>
+        <App name="ORACLE_PARTITION_PACKAGE"/>
+        <!--###### N2 ######-->
+        <App name="N2">
+          <Properties>
+            <Property name="run_parent">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="N2P">
+          <Properties>
+            <Property name="run_parent">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="N2_3RD"/>
+        <!--###### MEDIATION ######-->
+        <App name="DVX2"/>
+        <App name="MED2"/>
+        <App name="GD"/>
+        <App name="SP"/>
+        <App name="NCI2">
+          <Properties>
+            <Property name="run_nci2_services_parent_per_host">
+              <Value>true</Value>
+            </Property>
+            <Property name="security_enabled">
+              <Value>0</Value>
+            </Property>
+            <!-- ## needed for FaultPro only -->
+            <Property name="run_nci2_telnetd_sa_parent">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="PLUGIN"/>
+        <App name="INT_ALARMS"/>
+        <!--###### STUDIO ######-->
+        <App name="MS"/>
+        <App name="EZS"/>
+        <App name="EZSPMM2"/>
+        <App name="EASY_PM"/>
+        <!--###### FAM ######-->
+        <App name="FAM_SERVICES"/>
+        <App name="FAM_TRS"/>
+        <!--###### PMM ######-->
+        <App name="PMM2">
+          <Properties>
+            <Property name="run_parent">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="TG"/>
+        <!--###### OTHERS ######-->
+    <App name="AD_AGENT">
+      <Properties>
+        <Property name="centerHostname">
+          <Value>d50i-hlx-app97</Value>
+        </Property>
+        <Property name="centerPort">
+          <Value>4006</Value>
+        </Property>
+        <Property name="useHTTPS">
+          <Value>true</Value>
+        </Property>
+        <Property name="keystorePassword">
+          <Value>YWVzMjU2JEVXeHdrZ3hFaDFmdTVUejZkS2o1dElvekQxTHo4UlUzdEQxWG9JcGc3NmI4U2djWTZMVEFOZ3JYWmZxNXRLNEQ</Value>
+        </Property>
+      </Properties>
+    </App>
+        <App name="SNMP_AGENT"/>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="MAINTENANCE"/>
+        <App name="SEC_INF">
+          <Properties>
+            <Property name="run_parent">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+      </NetracServer>
+    </Host>
+    <!-- J2EE SERVER MAIN -->
+    <Host name="d50i-sa-app13" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <HazelcastPortRange firstPort="5701" gap="20"/>
+      <BaseDir>/teoco/helix_web1</BaseDir>
+      <DB>
+        <Home>/OracleSoftware/Oracle_Client_19c_linux</Home>
+        <Interface type="Service">saqadokr</Interface>
+      </DB>
+      <JEE>
+        <AdminServer port="3630" user="weblogic" password="weblogic103"/>
+        <AppServer name="PI" port="3631" jmxPort="8031" ldapPort="9031" heapSizeMB="1024">
+          <App name="PIMNGR"/>
+          <App name="MDMapping"/>
+          <App name="ConfigurationChangeEvents"/>
+        </AppServer>
+        <AppServer name="FamHistory" port="3833" jmxPort="8833" ldapPort="9833" heapSizeMB="2048">
+          <App name="FamHistory"/>
+        </AppServer>
+        <AppServer name="FamCache-app13" port="3634" jmxPort="8034" ldapPort="9034" distributedCache="true" heapSizeMB="2048">
+          <App name="JFam"/>
+        </AppServer>
+        <AppServer name="VIEWS" port="3637" jmxPort="8037" ldapPort="9037" heapSizeMB="2048">
+          <App name="SchematicViewsClient"/>
+          <App name="SchematicViewsServer"/>
+          <App name="SchematicViewsFamAPI"/>
+          <App name="TrafficGuard"/>
+          <App name="TrafficGuardForPMClient"/>
+        </AppServer>
+        <AppServer name="WR" port="3638" jmxPort="8038" ldapPort="9038" heapSizeMB="2048">
+          <App name="WR_FAM"/>
+          <App name="WR_PMM"/>
+          <App name="PmDataMonitor"/>
+        </AppServer>
+        <AppServer name="IMPORT" port="3640" jmxPort="8040" ldapPort="9040" heapSizeMB="512">
+          <App name="IMPORT"/>
+        </AppServer>
+        <AppServer name="AD" port="3644" jmxPort="8044" ldapPort="9044" heapSizeMB="1024">
+          <App name="Autodiscovery"/>
+        </AppServer>
+        <AppServer name="GIS" port="3844" jmxPort="8844" ldapPort="9844" heapSizeMB="3072">
+          <App name="GIS"/>
+          <App name="BCAPI"/>
+        </AppServer>
+        <AppServer name="GEO" port="3855" jmxPort="8855" ldapPort="9855" heapSizeMB="3072">
+          <App name="GeoServer"/>
+        </AppServer>
+        <AppServer name="FM" port="3853" jmxPort="8853" ldapPort="9853" heapSizeMB="2048">
+          <App name="FamApi"/>
+          <App name="FaultProModule"/>
+          <App name="FaultProShell"/>
+          <App name="MapsModule"/>
+          <App name="WinFam"/>
+          <App name="FaMLiteShell"/>
+          <App name="HistoryAnalisysModule"/>
+          <App name="FaMAdminModule"/>
+          <App name="FaMAdminShell"/>
+          <App name="FaMShell"/>
+          <App name="SecureAccessMT"/>
+          <App name="Maintcalendar"/>
+          <App name="MaintenanceDBPlugin"/>
+          <App name="FamMaintenance"/>
+        </AppServer>
+        <AppServer name="CLIENTS" port="3838" jmxPort="8838" ldapPort="9838" heapSizeMB="2048">
+          <App name="StudioShell"/>
+          <App name="EasySnmpPMMModule"/>
+          <App name="EasySnmpFaMModuleCB"/>
+          <App name="PMMModules"/>
+          <App name="PMMAdminModule"/>
+          <App name="PMMAdminShell"/>
+          <App name="DVXModulesCB"/>
+          <App name="PmmApi"/>
+          <App name="SPCModule"/>
+          <App name="StudioMainModule"/>
+          <App name="STUDIO_FAM_MODULES"/>
+          <App name="GDClientCB"/>
+          <App name="MediationAdminClientCB"/>
+          <App name="NCIClientCB"/>
+          <App name="SnmpAgentClientCB"/>
+          <App name="PmGisModule"/>
+          <App name="KPIManager"/>
+          <App name="RealTimeMonitorClient"/>
+          <App name="RTM-Mediation"/>
+          <App name="RTMShell"/>
+          <App name="Forecaster"/>
+          <App name="Inspector"/>
+        </AppServer>
+        <AppServer name="ATHPA" port="3843" jmxPort="8843" ldapPort="9843" heapSizeMB="2048">
+          <App name="AutomaticThreshold"/>
+          <App name="PMAnalytics"/>
+        </AppServer>
+        <AppServer name="FA" port="3953" jmxPort="8953" ldapPort="9953" heapSizeMB="2048">
+          <App name="FamRCA"/>
+          <App name="FamAnalytics"/>
+        </AppServer>
+       <AppServer name="CFG" port="3875" jmxPort="8875" ldapPort="9875" heapSizeMB="2048">
+          <App name="ConfigurationFilesClient"/>
+          <App name="ConfigurationFilesServer"/>
+        </AppServer>
+       <AppServer name="SI" port="3636" jmxPort="8036" ldapPort="9036" heapSizeMB="2048">
+          <App name="ServiceImpact"/>
+          <App name="SI_PMM"/>
+        </AppServer>
+        <AppServer name="ES" port="3842" jmxPort="8842" ldapPort="9842" heapSizeMB="2048">
+          <App name="ES"/>
+        </AppServer>
+      </JEE>
+      <NetracServer>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="MAINTENANCE"/>
+      </NetracServer>
+      <BOEServer cmsPort="6440" siaPort="3650" tomcatPort="8800" adminPassword="boxi123" locale="en_US.utf8" dbUser="BOE_DB" dbPassword="BOE_DB" dbInterface="saqadokr"/>
+    </Host>
+    <!-- J2EE SERVER PAIR A1 -->
+    <Host name="d50i-sa-app09" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <DockerRegistry port="5002" user="" password="" />
+      <ChartMuseum port="5003" user="helix" password="qwer90" />
+      <ApacheServer sslPort="3601"/>
+      <Kafka heapSizeMB="1024">
+        <Instance id="9" port="1555"/>
+      </Kafka>
+      <Zookeeper heapSizeMB="1024">
+        <Instance id="9" txPort="1222" rxPort="1333" clientPort="1444"/>
+      </Zookeeper>
+      <HazelcastPortRange firstPort="5701" gap="20"/>
+      <BaseDir>/teoco/helix_web_a1</BaseDir>
+      <DB>
+        <Home>/OracleSoftware/Oracle_Client_19c_linux</Home>
+        <Interface type="Service">saqadokr</Interface>
+      </DB>
+      <JEE>
+        <AppServer name="HelixAdmin-app09" port="3631" jmxPort="8131" ldapPort="9131" heapSizeMB="2048">
+          <App name="JCoreConsole"/>
+          <App name="HelixUI"/>
+          <App name="HelixAdmin"/>
+        </AppServer>
+        <AppServer name="FamEngine-app09" port="3632" jmxPort="8132" ldapPort="9132" heapSizeMB="2048">
+          <App name="FamEngine"/>
+        </AppServer>
+        <AppServer name="FamCache-app09" port="3633" jmxPort="8133" ldapPort="9133" distributedCache="true" heapSizeMB="2048">
+          <App name="JFam"/>
+        </AppServer>
+        <AppServer name="TG-app09" port="3634" jmxPort="8134" ldapPort="9134" heapSizeMB="2048">
+          <App name="BCAPI"/>
+          <App name="TrafficGuardForPMClient"/>
+          <App name="PMMc"/>
+          <App name="JBC"/>
+        </AppServer>
+      </JEE>
+      <NetracServer>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="MAINTENANCE"/>
+        <App name="KUBE_SYSTEM">
+          <Properties>
+            <Property name="apache_host">
+              <Value>d50i-hlx-app97</Value>
+            </Property>
+            <Property name="apache_ssl_port">
+              <Value>4005</Value>
+            </Property>
+          </Properties>
+        </App>
+      </NetracServer>
+    </Host>
+    <!-- J2EE SERVER PAIR A 2 -->
+    <Host name="d50i-sa-app10" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <DockerRegistry port="5002" user="" password="" />
+      <ChartMuseum port="5003" user="helix" password="qwer90" />
+      <ApacheServer sslPort="3601"/>
+      <Kafka heapSizeMB="1024">
+        <Instance id="10" port="1555"/>
+      </Kafka>
+      <Zookeeper heapSizeMB="1024">
+        <Instance id="10" txPort="1222" rxPort="1333" clientPort="1444"/>
+      </Zookeeper>
+      <HazelcastPortRange firstPort="5701" gap="20"/>
+      <BaseDir>/teoco/helix_web_a2</BaseDir>
+      <DB>
+        <Home>/OracleSoftware/Oracle_Client_19c_linux</Home>
+        <Interface type="Service">saqadokr</Interface>
+      </DB>
+      <JEE>
+        <AppServer name="HelixAdmin-app10" port="3731" jmxPort="8231" ldapPort="9231" heapSizeMB="2048">
+          <App name="JCoreConsole"/>
+          <App name="HelixUI"/>
+        </AppServer>
+        <AppServer name="FamEngine-app10" port="3732" jmxPort="8232" ldapPort="9232" heapSizeMB="2048">
+          <App name="FamEngine"/>
+        </AppServer>
+        <AppServer name="FamCache-app10" port="3733" jmxPort="8233" ldapPort="9233" distributedCache="true" heapSizeMB="2048">
+          <App name="JFam"/>
+        </AppServer>
+        <AppServer name="TG-app10" port="3734" jmxPort="8234" ldapPort="9234" heapSizeMB="2048">
+          <App name="BCAPI"/>
+          <App name="TrafficGuardForPMClient"/>
+          <App name="PMMc"/>
+          <App name="JBC"/>
+        </AppServer>
+      </JEE>
+      <NetracServer>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="MAINTENANCE"/>
+        <App name="KUBE_SYSTEM">
+          <Properties>
+            <Property name="apache_host">
+              <Value>d50i-hlx-app97</Value>
+            </Property>
+            <Property name="apache_ssl_port">
+              <Value>4005</Value>
+            </Property>
+          </Properties>
+        </App>
+      </NetracServer>
+    </Host>
+    <!-- J2EE SERVER PAIR B1 -->
+    <Host name="d50i-sa-app11" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <HazelcastPortRange firstPort="5701" gap="20"/>
+      <BaseDir>/teoco/helix_web_b1</BaseDir>
+      <Kafka heapSizeMB="1024">
+        <Instance id="11" port="1555"/>
+      </Kafka>
+      <Zookeeper heapSizeMB="1024">
+        <Instance id="11" txPort="1222" rxPort="1333" clientPort="1444"/>
+      </Zookeeper>
+      <DB>
+        <Home>/OracleSoftware/Oracle_Client_19c_linux</Home>
+        <Interface type="Service">saqadokr</Interface>
+      </DB>
+      <JEE>
+        <AppServer name="FamCache-app11" port="3831" jmxPort="8331" ldapPort="9331" distributedCache="true" heapSizeMB="2048">
+          <App name="JFam"/>
+        </AppServer>
+        <AppServer name="CRUISER-app11" port="3832" jmxPort="8332" ldapPort="9332" heapSizeMB="2048">
+          <App name="MapsModule"/>
+          <App name="WinFam"/>
+          <App name="FaultProModule"/>
+          <App name="FaMLiteShell"/>
+          <App name="FaMShell"/>
+        </AppServer>
+      </JEE>
+      <NetracServer>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="MAINTENANCE"/>
+      </NetracServer>
+    </Host>
+    <!-- J2EE SERVER PAIR B2 -->
+    <Host name="d50i-sa-app12" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <HazelcastPortRange firstPort="5701" gap="20"/>
+      <BaseDir>/teoco/helix_web_b2</BaseDir>
+      <DB>
+        <Home>/OracleSoftware/Oracle_Client_19c_linux</Home>
+        <Interface type="Service">saqadokr</Interface>
+      </DB>
+      <JEE>
+        <AppServer name="FamCache-app12" port="3931" jmxPort="8431" ldapPort="9431" distributedCache="true" heapSizeMB="2048">
+          <App name="JFam"/>
+        </AppServer>
+        <AppServer name="CRUISER-app12" port="3932" jmxPort="8432" ldapPort="9432" heapSizeMB="2048">
+          <App name="MapsModule"/>
+          <App name="WinFam"/>
+          <App name="FaultProModule"/>
+          <App name="FaMLiteShell"/>
+          <App name="FaMShell"/>
+        </AppServer>
+      </JEE>
+      <NetracServer>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="MAINTENANCE"/>
+      </NetracServer>
+    </Host>
+    <!-- ### UK ZONE SERVER 1### -->
+    <Host name="dc44-sadev-app01" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <BaseDir>/helix</BaseDir>
+      <NetracServer mediationPrimaryServer="true">
+        <App name="NCI2">
+          <Properties>
+            <Property name="run_nci2_services_parent_per_host">
+              <Value>true</Value>
+            </Property>
+            <Property name="security_enabled">
+              <Value>1</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="PLUGIN"/>
+        <App name="GD"/>
+        <App name="SP"/>
+        <App name="MED2">
+          <Properties>
+            <Property name="run_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+    <App name="AD_AGENT">
+      <Properties>
+        <Property name="centerHostname">
+          <Value>d50i-hlx-app97</Value>
+        </Property>
+        <Property name="centerPort">
+          <Value>4006</Value>
+        </Property>
+        <Property name="useHTTPS">
+          <Value>true</Value>
+        </Property>
+        <Property name="keystorePassword">
+          <Value>YWVzMjU2JEVXeHdrZ3hFaDFmdTVUejZkS2o1dElvekQxTHo4UlUzdEQxWG9JcGc3NmI4U2djWTZMVEFOZ3JYWmZxNXRLNEQ</Value>
+        </Property>
+      </Properties>
+    </App>
+        <App name="MAINTENANCE"/>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="N2P">
+          <Properties>
+            <Property name="run_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="N2">
+          <Properties>
+            <Property name="run_parent">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="N2_3RD"/>
+        <App name="SEC_INF">
+          <Properties>
+            <Property name="run_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+      </NetracServer>
+    </Host>
+    <!-- ### UK ZONE SERVER 2### -->
+    <Host name="dc44-sadev-app09" type="x86_64_Linux" locale="en_US.utf8">
+      <BaseDir>/helix</BaseDir>
+      <NetracServer mediationPrimaryServer="false">
+        <!--###### MEDIATION ######-->
+        <App name="MED2">
+          <Properties>
+            <Property name="run_med2_secondary_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="GD">
+          <Properties>
+            <Property name="run_gd_parent_per_host">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="DVX2">
+          <Properties>
+            <Property name="run_dvx2_secondary_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="NCI2">
+          <Properties>
+            <Property name="run_nci2_services_parent_per_host">
+              <Value>true</Value>
+            </Property>
+            <Property name="security_enabled">
+              <Value>0</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="PLUGIN"/>
+        <App name="INT_ALARMS"/>
+        <!--###### OTHERS ######-->
+        <App name="MAINTENANCE"/>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+      </NetracServer>
+    </Host>
+    <!-- ### ISR ZONE ### -->
+    <Host name="dc50-dev-gold18" type="x86_64_Linux" isClusterLogicalHost="false" locale="en_US.utf8">
+      <BaseDir>/helix</BaseDir>
+      <NetracServer mediationPrimaryServer="true">
+        <App name="NCI2">
+          <Properties>
+            <Property name="run_nci2_services_parent_per_host">
+              <Value>true</Value>
+            </Property>
+            <Property name="security_enabled">
+              <Value>1</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="PLUGIN"/>
+        <App name="GD"/>
+        <App name="SP"/>
+        <App name="MED2">
+          <Properties>
+            <Property name="run_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+    <App name="AD_AGENT">
+      <Properties>
+        <Property name="centerHostname">
+          <Value>d50i-hlx-app97</Value>
+        </Property>
+        <Property name="centerPort">
+          <Value>4005</Value>
+        </Property>
+        <Property name="useHTTPS">
+          <Value>true</Value>
+        </Property>
+        <Property name="keystorePassword">
+          <Value>YWVzMjU2JEVXeHdrZ3hFaDFmdTVUejZkS2o1dElvekQxTHo4UlUzdEQxWG9JcGc3NmI4U2djWTZMVEFOZ3JYWmZxNXRLNEQ</Value>
+        </Property>
+      </Properties>
+    </App>
+        <App name="MAINTENANCE"/>
+        <App name="TEOCO_MONITOR_AGENTS"/>
+        <App name="HELIX_MONITOR_AGENT"/>
+        <App name="N2P">
+          <Properties>
+            <Property name="run_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="N2">
+          <Properties>
+            <Property name="run_parent">
+              <Value>true</Value>
+            </Property>
+          </Properties>
+        </App>
+        <App name="N2_3RD"/>
+        <App name="SEC_INF">
+          <Properties>
+            <Property name="run_parent">
+              <Value>false</Value>
+            </Property>
+          </Properties>
+        </App>
+      </NetracServer>
+    </Host>
+  </Hosts>
+  <Applications>
+    <App name="JCore">
+      <Properties>
+        <Property name="client.RNS.host">
+          <Value>d50i-sa-app14</Value>
+        </Property>
+        <Property name="client.RNS.port">
+          <Value>5800</Value>
+        </Property>
+        <Property name="locale.enableTimeZone">
+          <Value>true</Value>
+        </Property>
+      </Properties>
+    </App>
+    <App name="IMPORT">
+      <Properties>
+        <Property name="REJECTED_DIRECTORY">
+          <Value>$BASE_DIR$/ttij2ee/project/metadata/IMPORT/ImportDirs/rej</Value>
+        </Property>
+        <Property name="ARCHIVE_DIRECTORY">
+          <Value>$BASE_DIR$/ttij2ee/project/metadata/IMPORT/ImportDirs/arc</Value>
+        </Property>
+        <Property name="INPUT_JOBS_DIRECTORY">
+          <Value>$BASE_DIR$/ttij2ee/project/metadata/IMPORT/ImportDirs/job</Value>
+        </Property>
+        <Property name="GUI_AUTO_DISCOVERY_IS_INSTALLED">
+          <Value>true</Value>
+        </Property>
+      </Properties>
+    </App>
+    <App name="GIS">
+      <Properties>
+        <Property name="geoServer.URL">
+          <Value>http://d50i-sa-app13:3855/geoserver</Value>
+        </Property>
+        <Property name="geoserver.data.dir">
+          <Value>$BASE_DIR$/ttij2ee/product/GEO/GEO.ear/geoserver.war/data/data</Value>
+        </Property>
+        <Property name="external.coordinates.files.dir">
+          <Value>$BASE_DIR$/ttij2ee/project/metadata/GIS/external</Value>
+        </Property>
+      </Properties>
+    </App>
+    <App name="HELIX_MONITOR_AGENT">
+<!-- EMPTY PROPERTY WILL CAUSE NO TO BE MONITORED -->
+      <Properties>
+        <Property name="ENV_NAME">
+          <Value>ACTIVE-ACTIVE_QA</Value>
+<!--Description: "Friendly Environment name"/-->
+        </Property>
+        <Property name="INFLUXDB_HOST">
+          <Value>lth-sadev-app08.nix.teo.earth</Value>
+<!--Description: "Host name of helix monitor server"/-->
+        </Property>
+        <Property name="INFLUXDB_PORT">
+          <Value>8086</Value>
+<!--Description: "Port of InfluxDB. Usually 8086"/-->
+        </Property>
+        <Property name="ORACLE_HOST">
+          <Value>d50d-sa-db01</Value>
+<!--Description: "Host name of Oracle Server"/-->
+        </Property>
+        <Property name="ORACLE_PORT">
+          <Value>1529</Value>
+<!--Description: "Listener Port of Oracle"/-->
+        </Property>
+        <Property name="ORACLE_SID">
+          <Value>saqadokr</Value>
+<!--Description: "Name of the ORACLE_SID"/-->
+        </Property>
+        <Property name="ORACLE_USER">
+          <Value>psa</Value>
+<!--Description: "Oracle user for check DB"/-->
+        </Property>
+        <Property name="ORACLE_PASSWORD">
+          <Value>ttipass</Value>
+<!--Description: "Password for the ORACLE_USER"/-->
+        </Property>
+        <Property name="PROMETHEUS_PORT">
+          <Value>9000</Value>
+<!--Description: "Prometheus listening port"/-->
+        </Property>
+        <Property name="CLOUDERA_CM_HOST">
+          <Value></Value>
+<!--Description: "Cloudera cluster host"/-->
+        </Property>
+        <Property name="CLOUDERA_CM_PORT">
+          <Value></Value>
+<!--Description: "Cloudera cluster port, typically 7180"/-->
+        </Property>
+        <Property name="CLOUDERA_CM_USER">
+          <Value></Value>
+<!--Description: "Cloudera cluster user"/-->
+        </Property>
+        <Property name="CLOUDERA_CM_PASSWORD">
+          <Value></Value>
+<!--Description: "Cloudera cluster password"/-->
+        </Property>
+        <Property name="IMPALA_NODE">
+          <Value></Value>
+<!--Description: "ImpalaDB host"/-->
+        </Property>
+        <Property name="IMPALA_PORT">
+          <Value></Value>
+<!--Description: "ImpalaDB port"/-->
+        </Property>
+        <Property name="IMPALA_USER">
+          <Value></Value>
+<!--Description: "ImpalaDB user"/-->
+        </Property>
+        <Property name="IMPALA_PASSWORD">
+          <Value></Value>
+<!--Description: "ImpalaDB password"/-->
+        </Property>
+        <Property name="IMPALA_TABLE_LIST">
+          <Value></Value>
+<!--Description: "Comma-separated list of schema and tables"/-->
+        </Property>
+        <Property name="HDFS_NAMENODE">
+          <Value></Value>
+<!--Description: "HDFS Cluster namenode"/-->
+        </Property>
+        <Property name="HDFS_NODE_PORT">
+          <Value></Value>
+<!--Description: "HDFS Cluster port, typically 14000 (via web-service HttpHDFS/WebHDFS)"/-->
+        </Property>
+        <Property name="HDFS_PARTITION_LIST">
+          <Value></Value>
+<!--Description: "Comma-separated list of HDFS partitions to be analyzed"/-->
+        </Property>
+        <Property name="EZIMPORT_IN_DIR">
+          <Value></Value>
+<!--Description: "EZ Import IN directory"/-->
+        </Property>
+        <Property name="EZIMPORT_LOG_DIR">
+          <Value></Value>
+<!--Description: "EZ Import log directory"/-->
+        </Property>
+        <Property name="ICMP_SERVER_LIST">
+          <Value>d50i-sa-app13|d50i-sa-app14|d50i-sa-app09|d50i-sa-app10|d50i-sa-app11|d50i-sa-app12|dc50-dev-gold18|dc44-sadev-app01|dc44-sadev-app09|d50i-hlx-app97</Value>
+<!--Description: "Pipe-delimited remote servers list (format: IP1,hostname1|IP2,hostname2|"/-->
+        </Property>
+      </Properties>
+    </App>
+  </Applications>
+</InstallationPlan>
+
